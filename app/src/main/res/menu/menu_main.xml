@@ -1,0 +1,25 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.mrbttf.translator2.MainActivity">
+    <item
+        android:id="@+id/action_browse"
+        android:orderInCategory="100"
+        android:title="@string/action_browse"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/magnifier"
+        />
+    <item
+        android:id="@+id/action_save"
+        android:orderInCategory="100"
+        android:title="@string/action_browse"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/save"
+        />
+    <item
+        android:id="@+id/action_about"
+        android:orderInCategory="100"
+        android:title="@string/action_about"
+        app:showAsAction="never"
+        />
+</menu>

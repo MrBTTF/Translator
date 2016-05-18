@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Translator</string>
+    <string name="action_browse">Browse</string>
+    <string name="action_save">Save</string>
+    <string name="action_about">About</string>
+    <string name="translation_info">Enter text or choose text file:</string>
+    <string name="savefile_info">Enter file name:</string>
+</resources>
