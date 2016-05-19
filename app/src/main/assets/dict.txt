@@ -408,6 +408,8 @@ hollandais
 hollander
 hollande
 holland
+hello
+salut
 homère
 homer
 honduras

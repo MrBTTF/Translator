@@ -8,18 +8,19 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.mrbttf.translator2.MainActivity$PlaceholderFragment"
     android:orientation="vertical"
-    android:weightSum="10">
+    android:weightSum="11">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/translation_info"
-        android:id="@+id/textView" />
+        android:id="@+id/textView"
+        android:layout_weight="1" />
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="20">
+        android:layout_height="wrap_content"
+        android:layout_weight="7">
 
         <EditText
             android:layout_width="match_parent"
@@ -47,7 +48,7 @@
         android:layout_height="wrap_content"
         android:text="Translate"
         android:id="@+id/button_translate"
-        android:layout_weight="0.3"
+        android:layout_weight="0.5"
         android:theme="@style/TranslateButton" />
 
 </LinearLayout>

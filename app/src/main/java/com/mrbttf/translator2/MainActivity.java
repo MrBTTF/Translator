@@ -423,12 +423,12 @@ public class MainActivity extends AppCompatActivity
                 if(isPunctuation(word.charAt(word.length()-1)))
                 {
                     p= String.valueOf(word.charAt(word.length()-1));
-                    word =word.toLowerCase().substring(0, word.length() -1);
+                    word =word.substring(0, word.length() -1);
                 }
 
                if(!curMap.containsKey(word.toLowerCase()))
                 {
-                    translation.append(word + " ");
+                    translation.append(word + p + " ");
                     continue;
                 }
 
