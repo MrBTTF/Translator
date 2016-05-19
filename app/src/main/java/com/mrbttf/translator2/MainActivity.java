@@ -42,7 +42,6 @@ import java.util.Scanner;
 public class MainActivity extends AppCompatActivity
 {
     public static final String G_LOG = "Translator";
-    final int FILE_SELECT_CODE = 0;
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
@@ -68,7 +67,6 @@ public class MainActivity extends AppCompatActivity
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
-        // Set up the ViewPager with the sections adapter.
         viewPager = (ViewPager) findViewById(R.id.container);
         viewPager.setAdapter(mSectionsPagerAdapter);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -312,10 +310,7 @@ public class MainActivity extends AppCompatActivity
 
         private boolean engFra;
 
-        public PlaceholderFragment()
-        {
-
-        }
+        public PlaceholderFragment() {}
 
         public static PlaceholderFragment newInstance(boolean engFra) {
             PlaceholderFragment fragment = new PlaceholderFragment();
@@ -361,6 +356,7 @@ public class MainActivity extends AppCompatActivity
                     editTextSource.setText("");
                 }
             });
+            //The spike which props layout
             Space space = (Space) rootView.findViewById(R.id.space);
             space.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,mainActivity.tabLayout.getMeasuredHeight()));
 
@@ -394,7 +390,6 @@ public class MainActivity extends AppCompatActivity
             String[] words = text.split(" ");
 
             StringBuffer translation = new StringBuffer();
-
             for (String word : words)
             {
 
