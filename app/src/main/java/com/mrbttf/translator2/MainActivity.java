@@ -10,6 +10,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.widget.LinearLayout;
+import android.widget.Space;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -359,6 +361,9 @@ public class MainActivity extends AppCompatActivity
                     editTextSource.setText("");
                 }
             });
+            Space space = (Space) rootView.findViewById(R.id.space);
+            space.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,mainActivity.tabLayout.getMeasuredHeight()));
+
             return rootView;
         }
 
