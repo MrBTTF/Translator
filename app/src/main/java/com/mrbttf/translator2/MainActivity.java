@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -49,10 +50,8 @@ public class MainActivity extends AppCompatActivity
     private HashMap<String,String> engFraMap;
     private HashMap<String,String> fraEngMap;
 
-    public boolean engFra;
 
-    public String translatedTextEng;
-    public String translatedTextFra;
+    public String translatedText;
 
     private String filename = "";
 
@@ -92,11 +91,7 @@ public class MainActivity extends AppCompatActivity
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
 
-
-        engFra=true;
-        translatedTextEng="";
-        translatedTextFra="";
-
+        translatedText="";
 
         loadDict();
 
@@ -137,21 +132,17 @@ public class MainActivity extends AppCompatActivity
 
     private void tabChanged(int position)
     {
-        engFra=position==0 ? true : false;
-
-        if(!engFra)
-            mSectionsPagerAdapter.saveEngFraTranslation();
-        else
-            mSectionsPagerAdapter.saveFraEngTranslation();
-
-        mSectionsPagerAdapter.update();
+        if(translatedText=="") return;
+        PlaceholderFragment curFragment = (PlaceholderFragment) mSectionsPagerAdapter.getItem(position);
+        curFragment.setTranslation(translatedText);
         mSectionsPagerAdapter.notifyDataSetChanged();
+        translatedText="";
 
     }
 
     public void changePage()
     {
-        viewPager.setCurrentItem(engFra ? 0 : 1,true);
+        viewPager.setCurrentItem(viewPager.getCurrentItem()==1 ? 0 : 1 ,true);
     }
 
 
@@ -229,11 +220,9 @@ public class MainActivity extends AppCompatActivity
                     e.printStackTrace();
                 }
                 BufferedWriter bw = new BufferedWriter(fw);
+                PlaceholderFragment curFragment = (PlaceholderFragment) mSectionsPagerAdapter.getItem(viewPager.getCurrentItem());
                 try {
-                    if(engFra)
-                            bw.write(translatedTextEng);
-                    else
-                        bw.write(translatedTextFra);
+                    bw.write(curFragment.getTranslation());
                     bw.close();
                 } catch (IOException e)
                 {
@@ -283,17 +272,10 @@ public class MainActivity extends AppCompatActivity
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     }
-                    if(engFra)
-                    {
-                        translatedTextEng = content;
-                    }
-                    else
-                    {
-                       translatedTextFra = content;
-                    }
-                    mSectionsPagerAdapter.update();
-                    mSectionsPagerAdapter.notifyDataSetChanged();
 
+                    PlaceholderFragment curFragment = (PlaceholderFragment) mSectionsPagerAdapter.getItem(viewPager.getCurrentItem());
+                    curFragment.setTranslation(content);
+                    mSectionsPagerAdapter.notifyDataSetChanged();
 
                 }
             }).showDialog();
@@ -326,13 +308,16 @@ public class MainActivity extends AppCompatActivity
         private EditText editTextSource;
         private Button buttonTranslate;
 
+        private boolean engFra;
+
         public PlaceholderFragment()
         {
 
         }
 
-        public static PlaceholderFragment newInstance() {
+        public static PlaceholderFragment newInstance(boolean engFra) {
             PlaceholderFragment fragment = new PlaceholderFragment();
+            fragment.engFra = engFra;
             return fragment;
         }
 
@@ -344,7 +329,11 @@ public class MainActivity extends AppCompatActivity
             mainActivity = (MainActivity) activity;
         }
 
-
+        @Override
+        public void onCreate(@Nullable Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setRetainInstance(true);
+        }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -352,6 +341,7 @@ public class MainActivity extends AppCompatActivity
         {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             editTextSource = (EditText) rootView.findViewById(R.id.editText_source);
+
             buttonTranslate = (Button) rootView.findViewById(R.id.button_translate);
             buttonTranslate.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -369,41 +359,25 @@ public class MainActivity extends AppCompatActivity
                     editTextSource.setText("");
                 }
             });
-           /*TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-            textView.setText(getString(R.string.section_format));*/
-
             return rootView;
         }
 
-        public void update()
+
+        public void setTranslation(String content)
         {
-            if(mainActivity.engFra)
-            {
-                editTextSource.setText(mainActivity.translatedTextEng);
-            }
-            else
-            {
-                editTextSource.setText(mainActivity.translatedTextFra);
-            }
+            editTextSource.setText(content);
         }
 
-        public void saveTranslation()
+        public String getTranslation()
         {
-            if(mainActivity.engFra)
-            {
-                mainActivity.translatedTextFra=editTextSource.getText().toString();
-            }
-            else
-            {
-                mainActivity.translatedTextEng=editTextSource.getText().toString();
-            }
+            return editTextSource.getText().toString();
         }
 
 
         public void onTranslateButtonClick(View view)
         {
-            HashMap<String,String> curMap=null;
-            if(mainActivity.engFra)
+            HashMap<String,String> curMap;
+            if(engFra)
                 curMap=mainActivity.getEngFraMap();
             else
                 curMap=mainActivity.getFraEngMap();
@@ -441,20 +415,8 @@ public class MainActivity extends AppCompatActivity
                 translation.append(trword + p + " ");
             }
 
-            if(!mainActivity.engFra)
-            {
-                mainActivity.translatedTextEng = translation.substring(0, translation.length() - 1).toString();
-                mainActivity.translatedTextFra = text;
-            }
-            else
-            {
-                mainActivity.translatedTextFra = translation.substring(0, translation.length() - 1).toString();
-                mainActivity.translatedTextEng = text;
-
-            }
-            mainActivity.engFra =! mainActivity.engFra;
+            mainActivity.translatedText = translation.substring(0, translation.length() - 1).toString();
             mainActivity.changePage();
-
 
         }
 
@@ -482,40 +444,24 @@ public class MainActivity extends AppCompatActivity
         public SectionsPagerAdapter(FragmentManager fm)
         {
             super(fm);
-            fragmentEngFra = new PlaceholderFragment();
-            fragmentFraEng = new PlaceholderFragment();
-
         }
 
         @Override
         public Fragment getItem(int position)
         {
             if(position==0) {
-                fragmentEngFra = PlaceholderFragment.newInstance();
+                if(fragmentEngFra==null)
+                    fragmentEngFra = PlaceholderFragment.newInstance(true);
                 return fragmentEngFra;
             }
             else {
-                fragmentFraEng = PlaceholderFragment.newInstance();
+                if(fragmentFraEng==null)
+                   fragmentFraEng = PlaceholderFragment.newInstance(false);
                 return fragmentFraEng;
             }
         }
 
-        public void update()
-        {
-            fragmentFraEng.update();
-            fragmentEngFra.update();
-        }
 
-        public void saveEngFraTranslation()
-        {
-            fragmentEngFra.saveTranslation();
-
-        }
-        public void saveFraEngTranslation()
-        {
-            fragmentFraEng.saveTranslation();
-
-        }
 
         @Override
         public int getCount()
