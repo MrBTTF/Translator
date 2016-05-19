@@ -2,7 +2,6 @@ package com.mrbttf.translator2;
 
 import android.app.Activity;
 import android.content.DialogInterface;
-import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -10,8 +9,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.widget.LinearLayout;
-import android.widget.Space;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -24,19 +21,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.Space;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.Scanner;
 
 public class MainActivity extends AppCompatActivity
@@ -48,9 +42,7 @@ public class MainActivity extends AppCompatActivity
     private ViewPager viewPager;
     private TabLayout tabLayout;
 
-    private HashMap<String,String> engFraMap;
-    private HashMap<String,String> fraEngMap;
-
+    private Translator translator;
 
     public String translatedText;
 
@@ -93,46 +85,14 @@ public class MainActivity extends AppCompatActivity
 
         translatedText="";
 
-        loadDict();
+        translator = new Translator(this);
+        translator.loadDict();
 
-    }
-
-
-    private void loadDict()
-    {
-        engFraMap = new HashMap<>();
-        fraEngMap = new HashMap<>();
-        AssetManager am = getAssets();
-        InputStream is = null;
-        try
-        {
-            is = am.open("dict.txt");
-
-            InputStreamReader isr = new InputStreamReader(is, Charset.forName("UTF-8"));
-            BufferedReader br = new BufferedReader(isr);
-
-            String line1=null;
-            String line2=null;
-            while ((line1 = br.readLine()) != null)
-            {
-                line2 = br.readLine();
-                fraEngMap.put(line1,line2);
-                engFraMap.put(line2,line1);
-            }
-
-            br.close();
-            isr.close();
-            is.close();
-
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
     }
 
     private void tabChanged(int position)
     {
-        if(translatedText=="") return;
+        if(translatedText.isEmpty()) return;
         PlaceholderFragment curFragment = (PlaceholderFragment) mSectionsPagerAdapter.getItem(position);
         curFragment.setTranslation(translatedText);
         mSectionsPagerAdapter.notifyDataSetChanged();
@@ -140,13 +100,16 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    public void changePage()
+    //Called when button pressed
+    private void translateText()
     {
+        PlaceholderFragment curFragment = (PlaceholderFragment) mSectionsPagerAdapter.getItem(viewPager.getCurrentItem());
+        translatedText = translator.translateText(curFragment.getTranslation(),viewPager.getCurrentItem() != 1);
         viewPager.setCurrentItem(viewPager.getCurrentItem()==1 ? 0 : 1 ,true);
     }
 
-
-    void EnterFilename()
+    //Open enter text dialog
+    private void EnterFilename()
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.savefile_info);
@@ -237,14 +200,6 @@ public class MainActivity extends AppCompatActivity
         }).showDialog();
     }
 
-    public HashMap<String, String> getEngFraMap() {
-        return engFraMap;
-    }
-
-    public HashMap<String, String> getFraEngMap() {
-        return fraEngMap;
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
@@ -296,7 +251,6 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-
     /**
      * A placeholder fragment containing a simple view.
      */
@@ -304,20 +258,14 @@ public class MainActivity extends AppCompatActivity
     {
 
         MainActivity mainActivity;
-
         private EditText editTextSource;
         private Button buttonTranslate;
-
-        private boolean engFra;
 
         public PlaceholderFragment() {}
 
         public static PlaceholderFragment newInstance(boolean engFra) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            fragment.engFra = engFra;
-            return fragment;
+            return new PlaceholderFragment();
         }
-
 
         @Override
         public void onAttach(Activity activity)
@@ -344,7 +292,7 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onClick(View v) {
 
-                    onTranslateButtonClick(v);
+                    mainActivity.translateText();
                 }
             });
 
@@ -375,60 +323,6 @@ public class MainActivity extends AppCompatActivity
         }
 
 
-        public void onTranslateButtonClick(View view)
-        {
-            HashMap<String,String> curMap;
-            if(engFra)
-                curMap=mainActivity.getEngFraMap();
-            else
-                curMap=mainActivity.getFraEngMap();
-
-            String text = editTextSource.getText().toString();
-
-            if(text.isEmpty()) return;
-
-            String[] words = text.split(" ");
-
-            StringBuffer translation = new StringBuffer();
-            for (String word : words)
-            {
-
-                String p="";
-                if(isPunctuation(word.charAt(word.length()-1)))
-                {
-                    p= String.valueOf(word.charAt(word.length()-1));
-                    word =word.substring(0, word.length() -1);
-                }
-
-               if(!curMap.containsKey(word.toLowerCase()))
-                {
-                    translation.append(word + p + " ");
-                    continue;
-                }
-
-                StringBuffer trword = new StringBuffer(curMap.get(word.toLowerCase()).toLowerCase());
-                if(Character.isUpperCase(word.charAt(0)))
-                {
-                    trword.setCharAt(0,Character.toUpperCase(trword.charAt(0)));
-                }
-
-                translation.append(trword + p + " ");
-            }
-
-            mainActivity.translatedText = translation.substring(0, translation.length() - 1).toString();
-            mainActivity.changePage();
-
-        }
-
-
-        public boolean isPunctuation(char c) {
-            return c == ','
-                    || c == '.'
-                    || c == '!'
-                    || c == '?'
-                    || c == ':'
-                    || c == ';' ;
-        }
     }
 
     /**
