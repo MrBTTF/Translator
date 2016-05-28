@@ -15,25 +15,15 @@ import java.util.HashMap;
  */
 public class Translator
 {
-    private HashMap<String,String> engFraMap;
-    private HashMap<String,String> fraEngMap;
+    private static HashMap<String,String> engFraMap = new HashMap<>();
+    private static HashMap<String,String> fraEngMap = new HashMap<>();
 
-    Context context;
 
-    public Translator(Context context)
-    {
-        this.context = context;
-        engFraMap = new HashMap<>();
-        fraEngMap = new HashMap<>();
-    }
-
-    public void loadDict()
-    {
+    public static void loadDict(Context context) throws IOException {
         AssetManager am = context.getAssets();
         InputStream is;
-        try
-        {
-            is = am.open("dict.txt");
+
+        is = am.open("dict.txt");
 
             InputStreamReader isr = new InputStreamReader(is, Charset.forName("UTF-8"));
             BufferedReader br = new BufferedReader(isr);
@@ -47,17 +37,12 @@ public class Translator
                 engFraMap.put(line2,line1);
             }
 
-            br.close();
-            isr.close();
-            is.close();
-
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        br.close();
+        isr.close();
+        is.close();
     }
 
-    public String translateText(String text, boolean engFra)
+    public static String translateText(String text, boolean engFra)
     {
         HashMap<String,String> curMap;
         if(engFra)
@@ -99,7 +84,7 @@ public class Translator
         return translation.substring(0, translation.length() - 1);
     }
 
-    private boolean isPunctuation(char c) {
+    private static boolean isPunctuation(char c) {
         return c == ','
                 || c == '.'
                 || c == '!'

@@ -42,8 +42,6 @@ public class MainActivity extends AppCompatActivity
     private ViewPager viewPager;
     private TabLayout tabLayout;
 
-    private Translator translator;
-
     public String translatedText;
 
     private String filename = "";
@@ -85,9 +83,6 @@ public class MainActivity extends AppCompatActivity
 
         translatedText="";
 
-        translator = new Translator(this);
-        translator.loadDict();
-
     }
 
     private void tabChanged(int position)
@@ -104,7 +99,7 @@ public class MainActivity extends AppCompatActivity
     private void translateText()
     {
         PlaceholderFragment curFragment = (PlaceholderFragment) mSectionsPagerAdapter.getItem(viewPager.getCurrentItem());
-        translatedText = translator.translateText(curFragment.getTranslation(),viewPager.getCurrentItem() != 1);
+        translatedText = Translator.translateText(curFragment.getTranslation(),viewPager.getCurrentItem() != 1);
         viewPager.setCurrentItem(viewPager.getCurrentItem()==1 ? 0 : 1 ,true);
     }
 
